@@ -136,7 +136,7 @@ class BigBlueButtonApiController < ApplicationController
 
     begin
         server = Server.find_available(false)
-        if params[:meta_doRecording].present? && params[:meta_doRecording] == "true"
+        if params[:record].present? && params[:record] == "true"
             server = Server.find_available(true)
         end
     rescue ApplicationRedisRecord::RecordNotFound
