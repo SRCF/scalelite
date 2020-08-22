@@ -167,13 +167,16 @@ class Server < ApplicationRedisRecord
       id, load, hash = 5.times do
         ids_loads = redis.zrange('server_load', 0, 0, with_scores: true)
         raise RecordNotFound.new("Couldn't find available Server", name, nil) if ids_loads.blank?
+        recording_servers = ["dummy_id"]
         id, load = ids_loads.first
         if(for_recording)
-            recording_servers = ["dummy_id"]
             # we hard code the ids above for now
             # filter out all servers that don't appear in our array
             # expect data of the form [server_id, load]
             id, load = ids_loads.select {|item| recording_servers.include?(item[0])}.first
+        else
+            # filter out the unwanted servers meant for recording
+            id, load = ids_loads.select {|item| !recording_servers.include?(item[0])}.first
         end
         hash = redis.hgetall(key(id))
         break id, load, hash if hash.present?
