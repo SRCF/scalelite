@@ -182,7 +182,7 @@ class Server < ApplicationRedisRecord
         # only redirect if the servers must be for recording, it's okay if a non-recorded meeting gets put on a recording host
         servers = Server.available
         recording_servers = ["c5e13f13-58be-45f9-8806-99f1403c2f35", "59377ed8-9057-4e91-b177-a850b81ac44b"]
-        servers.select { |item| recording_servers.include? item['id']}.first
+        servers.select { |item| recording_servers.include? item.id}.first
       else
         new.init_with_attributes(hash)
       end
