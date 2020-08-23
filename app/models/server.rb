@@ -167,16 +167,7 @@ class Server < ApplicationRedisRecord
       id, load, hash = 5.times do
         ids_loads = redis.zrange('server_load', 0, 0, with_scores: true)
         raise RecordNotFound.new("Couldn't find available Server", name, nil) if ids_loads.blank?
-
-        recording_servers = ["TODO"]
-        id, load = ids_loads.select { |item|
-          if wants_recording
-            recording_servers.include? item[0]
-          else
-            recording_servers.exclude? item[0]
-          end
-        }.first
-
+        id, load = ids_loads.first
         hash = redis.hgetall(key(id))
         break id, load, hash if hash.present?
       end
@@ -186,7 +177,15 @@ class Server < ApplicationRedisRecord
       hash['enabled'] = true # all servers in server_load set are enabled
       hash['load'] = load
       hash['online'] = (hash['online'] == 'true')
-      new.init_with_attributes(hash)
+
+      if wants_recording
+        # only redirect if the servers must be for recording, it's okay if a non-recorded meeting gets put on a recording host
+        servers = Server.available
+        recording_servers = ["c5e13f13-58be-45f9-8806-99f1403c2f35", "59377ed8-9057-4e91-b177-a850b81ac44b"]
+        servers.select { |item| recording_servers.include? item['id']}.first
+      else
+        new.init_with_attributes(hash)
+      end
     end
   end
 
